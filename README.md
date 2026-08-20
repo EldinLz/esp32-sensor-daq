@@ -4,7 +4,7 @@ A custom two-layer PCB and Arduino firmware project for collecting ambient-light
 
 ![KiCad 3D render of the assembled sensor board](images/pcb-3d-perspective.png)
 
-> **Project status:** PCB design complete and ordered. Firmware compiles successfully for the ESP32-C3. Physical assembly and hardware validation are pending component and PCB arrival.
+> **Project status:** PCB fabrication is complete and the boards have arrived. Visual inspection found no obvious fabrication defects, and initial bare-board continuity checks passed, including no 3V3-to-GND short and expected continuity on known power and connector nets. Assembly is in progress. Powered hardware validation, sensor response, and end-to-end logging remain pending.
 
 ## Overview
 
@@ -82,16 +82,19 @@ time_ms,light_raw,light_percent,temperature_C,humidity_percent,pressure_hPa
 - KiCad schematic ERC: 0 errors and 0 warnings
 - KiCad PCB Editor DRC: 0 errors; one expected footprint/library mismatch warning after the ESP32 socket-pad customization
 - Unrouted connections: 0
-- Final Gerber and drill archive generated and accepted for PCB ordering
+- Final Gerber and drill archive generated; PCB fabrication is complete and the boards have arrived
+- Bare-board visual inspection: no obvious fabrication defects found
+- Initial power-off continuity checks: passed, including no 3V3-to-GND short and expected continuity on known power and connector nets
 - Arduino firmware: compile verified
-- Physical power-up, sensor response, and end-to-end logging: **pending**
+- Physical assembly: **in progress**
+- Powered hardware validation, sensor response, and end-to-end logging: **pending**
 
 See [VALIDATION.md](docs/VALIDATION.md) for the exact checks completed and [TEST_PLAN.md](docs/TEST_PLAN.md) for the hardware bring-up procedure.
 
 ## Next milestones
 
-- Assemble one board while preserving the remaining PCBs as spares
-- Verify 3V3-to-GND resistance before applying power
+- Complete assembly of one board while preserving the remaining PCBs as spares
+- Repeat the 3V3-to-GND short check after assembly and before applying power
 - Power the ESP32-C3 and confirm the 3.3 V rail at TP1
 - Upload the firmware and verify serial CSV output
 - Validate BME280 readings and light-response behavior

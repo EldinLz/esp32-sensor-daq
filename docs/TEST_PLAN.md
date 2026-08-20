@@ -77,9 +77,10 @@ With the BME280 disconnected, `NA,NA,NA` is expected for its three fields.
 
 | Item | Result | Measurement / notes |
 |---|---|---|
-| Bare-board inspection | Pending | |
-| TP1-to-TP2 resistance | Pending | |
-| TP1 voltage | Pending | |
+| Bare-board inspection | Pass | No obvious fabrication defects found. |
+| 3V3-to-GND short check | Pass | No short found during the initial bare-board check. |
+| Known power/connector net continuity | Pass | Expected continuity confirmed on known power and connector nets. |
+| TP1 voltage | Pending | Requires powered hardware. |
 | Firmware upload | Pending | |
 | Status LED | Pending | |
 | BME280 detected | Pending | |
