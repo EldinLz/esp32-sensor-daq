@@ -2,9 +2,9 @@
 
 A custom two-layer PCB and Arduino firmware project for collecting ambient-light, temperature, humidity, and pressure data with an ESP32-C3.
 
-![KiCad 3D render of the assembled sensor board](images/pcb-3d-perspective.png)
+![Assembled Rev A ESP32 sensor data-acquisition PCB](images/rev-a-assembled-angle.jpeg)
 
-> **Project status:** PCB fabrication is complete and the boards have arrived. Visual inspection found no obvious fabrication defects, and initial bare-board continuity checks passed, including no 3V3-to-GND short and expected continuity on known power and connector nets. Assembly is in progress. Powered hardware validation, sensor response, and end-to-end logging remain pending.
+> **Project status:** Rev A was hand-assembled, programmed, and hardware-validated on 2026-08-22. The ESP32-C3 streams serial CSV data, the BME280 is detected over I2C, and the MCP6002-buffered light channel responds from covered to bright-light conditions. Long-duration logging and calibrated light measurement have not been completed.
 
 ## Overview
 
@@ -20,13 +20,19 @@ flowchart LR
     ESP --> USB["CSV data over USB serial"]
 ```
 
+## Finished hardware
+
+The Rev A PCB was assembled by hand with the ESP32-C3 in removable socket headers and the BME280 connected through the labeled J1 I2C header.
+
+![Top-down view of the assembled PCB and connected BME280 breakout](images/rev-a-full-system.jpeg)
+
 ## Key features
 
 - ESP32-C3 DevKitM-1 controller on removable 1x15 sockets
-- BME280 interface with 4.7 kΩ I2C pull-up resistors
+- BME280 interface with 4.7 kOhm I2C pull-up resistors
 - Photoresistor voltage divider buffered by an MCP6002 op-amp
 - 100 nF local decoupling capacitor for the analog section
-- Status LED with a 330 Ω current-limiting resistor
+- Status LED with a 330 Ohm current-limiting resistor
 - Six labeled test points: 3V3, GND, raw light signal, buffered ADC signal, SDA, and SCL
 - CSV serial output suitable for logging or plotting
 - Through-hole construction for accessible hand assembly and rework
@@ -41,7 +47,7 @@ flowchart LR
 | Status LED | GPIO7 | D1 through R5 |
 | 3.3 V | 3V3 | TP1, J1 pin 1 |
 | Ground | GND | TP2, J1 pin 2 |
-| Raw light-divider signal | — | TP3 `RAW` |
+| Raw light-divider signal | - | TP3 `RAW` |
 
 ## Firmware
 
@@ -52,11 +58,12 @@ The Arduino firmware:
 3. Reads temperature, humidity, and pressure when the BME280 is available.
 4. Emits one CSV row per second at 115200 baud.
 
-Expected output format (illustrative, not measured hardware data):
+Measured Rev A serial output:
 
 ```text
+BME280 detected
 time_ms,light_raw,light_percent,temperature_C,humidity_percent,pressure_hPa
-1000,2048,50.0,23.41,44.20,1012.63
+628,2058,50.3,25.70,47.22,1009.73
 ```
 
 ### Build environment
@@ -66,6 +73,25 @@ time_ms,light_raw,light_percent,temperature_C,humidity_percent,pressure_hPa
 - Board target: `ESP32C3 Dev Module`
 - Adafruit BME280 Library 2.3.0 and its installed dependencies
 
+## Rev A hardware validation
+
+These captured values demonstrate end-to-end operation; they are not calibration data.
+
+| Check | Result | Captured evidence |
+|---|---|---|
+| Post-assembly power-off check | Pass | No 3V3-to-GND short was found. |
+| 3.3 V operation | Pass | The assembled board powered and ran from the ESP32-C3 3.3 V rail. |
+| Firmware and serial output | Pass | Firmware uploaded successfully and produced one 115200-baud CSV row per second. |
+| BME280 I2C sensing | Pass | Serial Monitor reported `BME280 detected`; observed readings were about 25.2-26.0 C, 47-49% RH, and 1009.7-1009.9 hPa. |
+| Light channel - covered | Pass | `light_raw` approximately 247-265; `light_percent` approximately 6.0-6.5%. |
+| Light channel - room light | Pass | `light_raw` approximately 1887-2134; `light_percent` approximately 46.1-52.1%. |
+| Light channel - flashlight | Pass | `light_raw` = 4095; `light_percent` = 100.0%. |
+| Status LED | Pass | A brief firmware-driven activity blink was observed. |
+
+`light_percent` is the 12-bit ADC reading normalized to full scale; it is not a calibrated lux measurement. The light tests validate the complete photoresistor-divider, MCP6002-buffer, ADC, firmware, and serial-output path, but do not independently characterize the op-amp transfer function.
+
+See [VALIDATION.md](docs/VALIDATION.md) for the full validation record and [TEST_PLAN.md](docs/TEST_PLAN.md) for the staged bring-up procedure.
+
 ## Repository structure
 
 ```text
@@ -73,8 +99,8 @@ time_ms,light_raw,light_percent,temperature_C,humidity_percent,pressure_hPa
 ├── fabrication/  Final Gerber and drill archive used for PCB ordering
 ├── firmware/     Arduino sketch folder and firmware source
 ├── hardware/     KiCad schematic, PCB, and project files
-├── images/       KiCad 3D renders
-└── docs/         BOM, validation notes, test plan, and resume notes
+├── images/       KiCad renders and finished Rev A build photos
+└── docs/         BOM, validation record, test plan, and resume notes
 ```
 
 ## Design and validation status
@@ -82,20 +108,13 @@ time_ms,light_raw,light_percent,temperature_C,humidity_percent,pressure_hPa
 - KiCad schematic ERC: 0 errors and 0 warnings
 - KiCad PCB Editor DRC: 0 errors; one expected footprint/library mismatch warning after the ESP32 socket-pad customization
 - Unrouted connections: 0
-- Final Gerber and drill archive generated; PCB fabrication is complete and the boards have arrived
-- Bare-board visual inspection: no obvious fabrication defects found
-- Initial power-off continuity checks: passed, including no 3V3-to-GND short and expected continuity on known power and connector nets
-- Arduino firmware: compile verified
-- Physical assembly: **in progress**
-- Powered hardware validation, sensor response, and end-to-end logging: **pending**
+- Gerber and drill archive generated; PCB fabrication and delivery complete
+- Rev A assembly, soldering, post-assembly short check, firmware upload, and serial output: complete
+- BME280 I2C sensing and end-to-end light-channel response: hardware-validated
 
-See [VALIDATION.md](docs/VALIDATION.md) for the exact checks completed and [TEST_PLAN.md](docs/TEST_PLAN.md) for the hardware bring-up procedure.
+## Optional follow-on characterization
 
-## Next milestones
+- Run and archive a one-hour serial logging test
+- Measure TP3 (`RAW`) and TP4 (`ADC`) simultaneously to quantify buffer tracking
+- Calibrate the light channel against a lux reference if absolute illumination is required
 
-- Complete assembly of one board while preserving the remaining PCBs as spares
-- Repeat the 3V3-to-GND short check after assembly and before applying power
-- Power the ESP32-C3 and confirm the 3.3 V rail at TP1
-- Upload the firmware and verify serial CSV output
-- Validate BME280 readings and light-response behavior
-- Capture oscilloscope or multimeter evidence and update this repository with measured results
