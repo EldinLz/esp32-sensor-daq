@@ -64,7 +64,7 @@ With the BME280 disconnected, `NA,NA,NA` is expected for its three fields.
 - Record TP3 (`RAW`) and TP4 (`ADC`) voltages under normal room light.
 - Cover the photoresistor and confirm both values change.
 - Illuminate the photoresistor and confirm both values change in the opposite direction.
-- Confirm `light_raw` remains within 0–4095 and changes with illumination.
+- Confirm `light_raw` remains within 0-4095 and changes with illumination.
 - Compare TP3 and TP4 to confirm the op-amp buffer follows the raw signal without obvious clipping.
 
 ## 8. Stability test
@@ -78,14 +78,16 @@ With the BME280 disconnected, `NA,NA,NA` is expected for its three fields.
 | Item | Result | Measurement / notes |
 |---|---|---|
 | Bare-board inspection | Pass | No obvious fabrication defects found. |
-| 3V3-to-GND short check | Pass | No short found during the initial bare-board check. |
+| 3V3-to-GND short check | Pass | No short found before or after Rev A assembly. |
 | Known power/connector net continuity | Pass | Expected continuity confirmed on known power and connector nets. |
-| TP1 voltage | Pending | Requires powered hardware. |
-| Firmware upload | Pending | |
-| Status LED | Pending | |
-| BME280 detected | Pending | |
-| Temperature plausible | Pending | |
-| Humidity plausible | Pending | |
-| Pressure plausible | Pending | |
-| Light response | Pending | |
-| One-hour logging test | Pending | |
+| TP1 / 3.3 V operation | Pass | The assembled board powered and ran from the ESP32-C3 3.3 V rail. |
+| Firmware upload | Pass | Upload completed, the flashed image hash was verified, and the ESP32-C3 reset into the application. |
+| Status LED | Pass | Brief firmware-driven activity blink observed. |
+| BME280 detected | Pass | Serial Monitor reported `BME280 detected`. |
+| Temperature plausible | Pass | Approximately 25.2-26.0 C during bring-up. |
+| Humidity plausible | Pass | Approximately 47-49% RH during bring-up. |
+| Pressure plausible | Pass | Approximately 1009.7-1009.9 hPa during bring-up. |
+| End-to-end light response | Pass | Approximately 6% covered, 46-52% in room light, and 100% under a flashlight. Percentages are normalized ADC full scale, not lux. |
+| Direct TP3-to-TP4 transfer measurement | Pending | The complete light channel works, but standalone buffer tracking has not been quantified. |
+| One-hour logging test | Pending | Long-duration stability logging has not been completed. |
+
